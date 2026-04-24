@@ -1,6 +1,6 @@
 //! Verification requests with ownership and fee checks, and events.
 
-use crate::admin_manager::AdminManager;
+use crate::auth::{require_admin_auth, require_owner_auth};
 use crate::errors::ContractError;
 use crate::events::{
     publish_verification_approved_event, publish_verification_rejected_event,
@@ -21,15 +21,11 @@ impl VerificationRegistry {
         requester: Address,
         evidence_cid: String,
     ) -> Result<(), ContractError> {
-        requester.require_auth();
-
         // 1. Validate project existence and ownership
         let mut project =
             ProjectRegistry::get_project(env, project_id).ok_or(ContractError::ProjectNotFound)?;
 
-        if project.owner != requester {
-            return Err(ContractError::Unauthorized);
-        }
+        require_owner_auth(&requester, &project.owner)?;
 
         // 2. Check if already verified or pending
         if project.verification_status != VerificationStatus::Unverified
@@ -76,8 +72,7 @@ impl VerificationRegistry {
         project_id: u64,
         admin: Address,
     ) -> Result<(), ContractError> {
-        admin.require_auth();
-        AdminManager::require_admin(env, &admin)?;
+        require_admin_auth(env, &admin)?;
 
         // Get project
         let mut project =
@@ -114,8 +109,7 @@ impl VerificationRegistry {
         project_id: u64,
         admin: Address,
     ) -> Result<(), ContractError> {
-        admin.require_auth();
-        AdminManager::require_admin(env, &admin)?;
+        require_admin_auth(env, &admin)?;
 
         // Get project
         let mut project =

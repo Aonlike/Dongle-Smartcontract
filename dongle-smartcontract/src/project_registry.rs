@@ -1,3 +1,4 @@
+use crate::auth::{require_owner_auth, require_self_auth};
 use crate::errors::ContractError;
 use crate::events::{publish_project_registered_event, publish_project_updated_event};
 use crate::storage_keys::StorageKey;
@@ -15,7 +16,7 @@ impl ProjectRegistry {
         env: &Env,
         params: ProjectRegistrationParams,
     ) -> Result<u64, ContractError> {
-        params.owner.require_auth();
+        require_self_auth(&params.owner);
 
         if params.name.is_empty() {
             panic!("InvalidProjectName");
@@ -89,13 +90,11 @@ impl ProjectRegistry {
         Ok(count)
     }
 
-    pub fn update_project(env: &Env, params: ProjectUpdateParams) -> Option<Project> {
-        let mut project = Self::get_project(env, params.project_id)?;
+    pub fn update_project(env: &Env, params: ProjectUpdateParams) -> Result<Project, ContractError> {
+        let mut project = Self::get_project(env, params.project_id)
+            .ok_or(ContractError::ProjectNotFound)?;
 
-        params.caller.require_auth();
-        if project.owner != params.caller {
-            return None;
-        }
+        require_owner_auth(&params.caller, &project.owner)?;
 
         if let Some(value) = params.name {
             project.name = value;
@@ -123,7 +122,7 @@ impl ProjectRegistry {
 
         publish_project_updated_event(env, params.project_id, project.owner.clone());
 
-        Some(project)
+        Ok(project)
     }
 
     pub fn get_project(env: &Env, project_id: u64) -> Option<Project> {

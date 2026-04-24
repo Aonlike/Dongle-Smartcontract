@@ -1,5 +1,6 @@
 //! Review registry: create/update/delete reviews and maintain aggregates and indexes.
 
+use crate::auth::require_self_auth;
 use crate::constants::{RATING_MAX, RATING_MIN};
 use crate::errors::ContractError;
 use crate::events::publish_review_event;
@@ -18,7 +19,7 @@ impl ReviewRegistry {
         rating: u32,
         comment_cid: Option<String>,
     ) -> Result<(), ContractError> {
-        reviewer.require_auth();
+        require_self_auth(&reviewer);
 
         if !(RATING_MIN..=RATING_MAX).contains(&rating) {
             return Err(ContractError::InvalidRating);
@@ -105,7 +106,7 @@ impl ReviewRegistry {
         rating: u32,
         comment_cid: Option<String>,
     ) -> Result<(), ContractError> {
-        reviewer.require_auth();
+        require_self_auth(&reviewer);
 
         if !(RATING_MIN..=RATING_MAX).contains(&rating) {
             return Err(ContractError::InvalidRating);
@@ -168,7 +169,7 @@ impl ReviewRegistry {
         project_id: u64,
         reviewer: Address,
     ) -> Result<(), ContractError> {
-        reviewer.require_auth();
+        require_self_auth(&reviewer);
 
         let review_key = StorageKey::Review(project_id, reviewer.clone());
         let existing: Review = env

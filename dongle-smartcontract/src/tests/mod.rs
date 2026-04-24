@@ -6,6 +6,7 @@ mod registration;
 mod verification;
 
 // New test modules
+mod authorization;
 mod events;
 mod pagination;
 

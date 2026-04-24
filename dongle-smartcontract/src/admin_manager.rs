@@ -3,6 +3,7 @@
 //! This module provides functionality for managing admin roles and enforcing
 //! access control across privileged contract operations.
 
+use crate::auth::require_admin_auth;
 use crate::errors::ContractError;
 use crate::events::{publish_admin_added_event, publish_admin_removed_event};
 use crate::storage_keys::StorageKey;
@@ -32,10 +33,7 @@ impl AdminManager {
 
     /// Add a new admin (only callable by existing admins)
     pub fn add_admin(env: &Env, caller: Address, new_admin: Address) -> Result<(), ContractError> {
-        caller.require_auth();
-
-        // Verify caller is an admin
-        Self::require_admin(env, &caller)?;
+        require_admin_auth(env, &caller)?;
 
         // Check if already an admin
         if Self::is_admin(env, &new_admin) {
@@ -65,10 +63,7 @@ impl AdminManager {
         caller: Address,
         admin_to_remove: Address,
     ) -> Result<(), ContractError> {
-        caller.require_auth();
-
-        // Verify caller is an admin
-        Self::require_admin(env, &caller)?;
+        require_admin_auth(env, &caller)?;
 
         // Prevent removing the last admin
         let admins = Self::get_admin_list(env);
