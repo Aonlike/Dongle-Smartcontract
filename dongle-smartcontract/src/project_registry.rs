@@ -1,10 +1,7 @@
-extern crate alloc;
-use alloc::string::ToString;
-
 use crate::errors::ContractError;
 use crate::storage_keys::StorageKey;
 use crate::types::{Project, ProjectRegistrationParams, ProjectUpdateParams, VerificationStatus};
-use soroban_sdk::{Address, Env, String, Vec};
+use soroban_sdk::{Address, Env, Vec};
 
 pub struct ProjectRegistry;
 
@@ -175,12 +172,25 @@ impl ProjectRegistry {
         }
         projects
     }
+}
 
-    pub fn validate_project_data(
+// ── Tests ─────────────────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+    use crate::errors::ContractError;
+    use crate::project_registry::ProjectRegistry;
+    use soroban_sdk::{Address, Env, String};
+
+    // Validation function only used in tests
+    fn validate_project_data(
         name: &String,
         _description: &String,
         _category: &String,
     ) -> Result<(), ContractError> {
+        extern crate alloc;
+        use alloc::string::ToString;
+
         let name_str = name.to_string();
 
         // 1. Validate Non-empty and not only whitespace
@@ -203,22 +213,13 @@ impl ProjectRegistry {
 
         Ok(())
     }
-}
-
-// ── Tests ─────────────────────────────────────────────────────────────────────
-
-#[cfg(test)]
-mod tests {
-    use crate::errors::ContractError;
-    use crate::project_registry::ProjectRegistry;
-    use soroban_sdk::{Address, Env, String};
 
     #[test]
     fn test_valid_project_name() {
         let env = Env::default();
         let name = String::from_str(&env, "Valid-Project_Name123");
 
-        let result = super::ProjectRegistry::validate_project_data(
+        let result = validate_project_data(
             &name,
             &String::from_str(&env, "Desc"),
             &String::from_str(&env, "Cat"),
@@ -231,7 +232,7 @@ mod tests {
         let env = Env::default();
         let name = String::from_str(&env, "   ");
 
-        let result = super::ProjectRegistry::validate_project_data(
+        let result = validate_project_data(
             &name,
             &String::from_str(&env, "Desc"),
             &String::from_str(&env, "Cat"),
@@ -244,7 +245,7 @@ mod tests {
         let env = Env::default();
         let name = String::from_str(&env, "My Project *");
 
-        let result = super::ProjectRegistry::validate_project_data(
+        let result = validate_project_data(
             &name,
             &String::from_str(&env, "Desc"),
             &String::from_str(&env, "Cat"),
@@ -258,7 +259,7 @@ mod tests {
         // 51 characters
         let name = String::from_str(&env, "ThisProjectNameIsWayTooLongAndExceedsTheFiftyCharL1");
 
-        let result = super::ProjectRegistry::validate_project_data(
+        let result = validate_project_data(
             &name,
             &String::from_str(&env, "Desc"),
             &String::from_str(&env, "Cat"),

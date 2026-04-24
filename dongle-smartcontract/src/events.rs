@@ -3,6 +3,7 @@ use soroban_sdk::{symbol_short, Address, Env, String, Symbol};
 
 pub const REVIEW: Symbol = symbol_short!("REVIEW");
 
+#[allow(clippy::too_many_arguments)]
 pub fn publish_review_event(
     env: &Env,
     project_id: u64,

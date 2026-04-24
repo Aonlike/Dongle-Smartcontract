@@ -10,7 +10,7 @@ use crate::fee_manager::FeeManager;
 use crate::project_registry::ProjectRegistry;
 use crate::storage_keys::StorageKey;
 use crate::types::{VerificationRecord, VerificationStatus};
-use soroban_sdk::{Address, Env, String, Vec};
+use soroban_sdk::{Address, Env, String};
 
 pub struct VerificationRegistry;
 
@@ -164,6 +164,7 @@ impl VerificationRegistry {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub fn verification_exists(env: &Env, project_id: u64) -> bool {
         env.storage()
             .persistent()
