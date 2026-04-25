@@ -1,6 +1,7 @@
 #![no_std]
 
 mod admin_manager;
+pub mod auth;
 pub mod constants;
 pub mod errors;
 pub mod events;
@@ -70,7 +71,7 @@ impl DongleContract {
         ProjectRegistry::register_project(&env, params)
     }
 
-    pub fn update_project(env: Env, params: ProjectUpdateParams) -> Option<Project> {
+    pub fn update_project(env: Env, params: ProjectUpdateParams) -> Result<Project, ContractError> {
         ProjectRegistry::update_project(&env, params)
     }
 
