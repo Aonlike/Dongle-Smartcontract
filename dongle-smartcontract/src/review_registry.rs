@@ -265,6 +265,17 @@ impl ReviewRegistry {
             .get(&StorageKey::Review(project_id, reviewer))
     }
 
+    pub fn get_project_stats(env: &Env, project_id: u64) -> ProjectStats {
+        env.storage()
+            .persistent()
+            .get(&StorageKey::ProjectStats(project_id))
+            .unwrap_or(ProjectStats {
+                rating_sum: 0,
+                review_count: 0,
+                average_rating: 0,
+            })
+    }
+
     pub fn list_reviews(env: &Env, project_id: u64, start_id: u32, limit: u32) -> Vec<Review> {
         let reviewers: Vec<Address> = env
             .storage()
